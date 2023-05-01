@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { constants as ethersConstants, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { ethers } from "hardhat";
+import { setTimeout } from "timers/promises";
 describe("NFTMarket", () => {
   let signers: SignerWithAddress[];
   let nftMarket: Contract;
@@ -36,7 +37,7 @@ describe("NFTMarket", () => {
       const currentAddress = await signers[0].getAddress();
       expect(ownerAddress).to.equal(currentAddress);
       const args = receipt.events[1].args;
-      expect(args.tokenID).to.equeal(tokenID);
+      expect(args.tokenID).to.equal(tokenID);
     });
   });
   describe("listNFT", () => {
@@ -63,7 +64,7 @@ describe("NFTMarket", () => {
       //NFTTransfer event should have the right args
       const args = receipt.events[2].args;
       expect(args.from).to.equal(signers[0].address);
-      expect(args.to).to.qual(nftMarket.address);
+      expect(args.to).to.equal(nftMarket.address);
       expect(args.tokenURI).to.equal("");
       expect(args.price).to.equal(price);
     });
@@ -86,7 +87,7 @@ describe("NFTMarket", () => {
       const price = 123;
       const sellerProfit = Math.floor((price * 95) / 100);
       const fee = price - sellerProfit;
-      const initailContractBalance = nftMarket.provider.getBalance(
+      const initailContractBalance = await nftMarket.provider.getBalance(
         nftMarket.address
       );
       const tokenID = createAndListNFT(price);
@@ -97,7 +98,7 @@ describe("NFTMarket", () => {
         .buyNFT(tokenID, { value: price });
       const receipt = await transaction.wait();
       await new Promise((r) => setTimeout(r, 100));
-      const finalContractBalance = nftMarket.provider.getBalance(
+      const finalContractBalance = await nftMarket.provider.getBalance(
         nftMarket.address
       );
       const newSellerBalance = await signers[0].getBalance();
@@ -140,9 +141,36 @@ describe("NFTMarket", () => {
       const args = receipt.event[2].args;
       expect(args.from).to.equal(nftMarket.address);
       expect(args.to).to.equal(signers[0].address);
-      expect(args.price).to.equal(123);
+      expect(args.price).to.equal(0);
       expect(args.tokenURI).to.equal("");
       expect(args.tokenID).to.equal(tokenID);
+    });
+    describe("withdrawFunds", () => {
+      it("should revert if callded by a signer other than the owner", async () => {
+        const transaction = nftMarket.connect(signers[1]).withdrawFunds();
+        await expect(transaction).to.be.revertedWith(
+          "Ownable: caller is not the owner"
+        );
+      });
+      it("should transfer all funnds from the contract balance to the owner's", async () => {
+        const contractBalance = await nftMarket.provider.getBalance(
+          nftMarket.address
+        );
+        const initailOwnerBalance = await signers[0].getBalance();
+        const transaction = await nftMarket.withdrawFunds();
+        const receipt = await transaction.wait();
+        await new Promise((r) => setTimeout(r, 100));
+        const newOwnerBalance = await signers[0].getBalance();
+        const gas = receipt.gasUsed.mul(receipt.effeciveGasPrice);
+        const transferred = newOwnerBalance.add(gas).sub(initailOwnerBalance);
+        expect(transferred).to.equal(contractBalance);
+      });
+      it("should revert if contract balace is zero", async () => {
+        const transaction = nftMarket.withdrawFunds();
+        await expect(transaction).to.be.revertedWith(
+          "NFTMarket: balance is zero"
+        );
+      });
     });
   });
 });

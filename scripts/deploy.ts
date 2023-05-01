@@ -1,23 +1,16 @@
 import { ethers } from "hardhat";
+import { NFTMarket } from "../typechain-types/contracts/NFTMarket";
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const unlockTime = currentTimestampInSeconds + 60;
-
-  const lockedAmount = ethers.utils.parseEther("0.001");
-
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
-
-  await lock.deployed();
-
-  console.log(
-    `Lock with ${ethers.utils.formatEther(lockedAmount)}ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`
-  );
+  const NFTMarket = await ethers.getContractFactory("NFTMarket");
+  const nftMarket = await NFTMarket.deploy();
+  await nftMarket.deployed();
+  console.log("Deployed to", nftMarket.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
+console.log("Test");
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
