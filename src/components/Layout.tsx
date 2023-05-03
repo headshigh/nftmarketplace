@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-// import TopBar from "./TopBar";
+import TopBar from "./TopBar";
 type LayoutProps = {
   children: ReactNode;
 };
