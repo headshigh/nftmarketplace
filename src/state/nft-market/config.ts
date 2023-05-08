@@ -1,2 +1,1 @@
-export const NFT_MARKET_ADDRESS = process.env
-  .NEXT_PUBLIC_NFT_MARKET_ADDRESS as string;
+export const NFT_MARKET_ADDRESS = "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC";
