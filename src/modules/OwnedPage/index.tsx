@@ -2,6 +2,7 @@ import useNFTMarket from "../../state/nft-market";
 import EmptyState from "../../components/EmptyState";
 import useSigner from "../../state/signer";
 import { GetOwnedListedNFTs } from "../../state/nft-market/__generated__/GetOwnedListedNFTs";
+import NFTCard from "../../components/NFTCard";
 const OwnedPage = () => {
   const { ownedNFTs, ownedListedNFTs } = useNFTMarket();
   console.log(ownedNFTs);
@@ -25,7 +26,11 @@ const OwnedPage = () => {
       {empty && <EmptyState>Your poor ass doesnot own any nfts</EmptyState>}
       {loaded && (
         <>
-          <div className="flex flex-wrap"></div>
+          <div className="flex flex-wrap">
+            {ownedNFTs?.map((nft) => (
+              <NFTCard nft={nft} className="mr-2 mb-2" key={nft.id} />
+            ))}
+          </div>
         </>
       )}
     </div>
