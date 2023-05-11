@@ -1,7 +1,8 @@
 import React from "react";
+import HomePage from "../src/modules/HomePage";
 
 function index() {
-  return <div className=" text-3xl">index</div>;
+  return <HomePage />;
 }
 
 export default index;

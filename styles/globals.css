@@ -25,3 +25,9 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+.bg-black{
+  background-color: black;
+}
+.bg-white{
+  background-color: rgb(255, 253, 253);
+}
